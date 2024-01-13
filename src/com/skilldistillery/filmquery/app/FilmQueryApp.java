@@ -1,6 +1,6 @@
+// FilmQueryApp.java
 package com.skilldistillery.filmquery.app;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -11,38 +11,77 @@ import com.skilldistillery.filmquery.entities.Film;
 
 public class FilmQueryApp {
 
-	DatabaseAccessor db = new DatabaseAccessorObject();
+    DatabaseAccessor db = new DatabaseAccessorObject();
 
-	public static void main(String[] args) throws SQLException {
-		FilmQueryApp app = new FilmQueryApp();
-		app.test();
-		app.launch();
-	}
+    public static void main(String[] args) {
+        FilmQueryApp app = new FilmQueryApp();
+        app.launch();
+    }
 
-	private void test() throws SQLException {
-		Film film = db.findFilmById(17);
-		System.out.println(film);
+    private void launch() {
+        Scanner input = new Scanner(System.in);
 
-		Actor actor = db.findActorById(17);
-		System.out.println(actor);
+        startUserInterface(input);
 
-		List<Film> films = db.findFilmsByActorId(29);
-		System.out.println(films);
+        input.close();
+    }
 
-		List<Actor> actors = db.findActorsByFilmId(29);
-		System.out.println(actors);
-	}
+    private void startUserInterface(Scanner input) {
+        boolean validEntry = true;
 
-	private void launch() {
-		Scanner input = new Scanner(System.in);
+        while (validEntry) {
+            System.out.println("***********Menu Options:***********");
+            System.out.println("1. Look Up Film By ID:            |");
+            System.out.println("2. Look Up Film By Search Keyword:|");
+            System.out.println("3. Exit Application               |");
+            System.out.println("***********Menu Options:***********");
 
-		startUserInterface(input);
+            int menuSelection = input.nextInt();
+            input.nextLine(); 
 
-		input.close();
-	}
+            switch (menuSelection) {
+                case 1:
+                    System.out.print("Enter Film ID: ");
+                    int filmId = input.nextInt();
+                    Film film = db.findFilmById(filmId);
+                    if (film != null) {
+                        displayFilmDetails(film);
+                    } else {
+                        System.out.println("Film not found for ID: " + filmId);
+                    }
+                    break;
+                case 2:
+                    // TODO: Implement searching by keyword
+                    break;
+                case 3:
+                    validEntry = false;
+                    System.out.println("Exiting Application.");
+                    break;
+                default:
+                    System.out.println("Invalid entry. Please select number (1 - 3): ");
+            }
+        }
+    }
 
-	private void startUserInterface(Scanner input) {
+    private void displayFilmDetails(Film film) {
+        System.out.println("Film ID: " + film.getId());
+        System.out.println("Title: " + film.getTitle());
+        System.out.println("Description: " + film.getDescription());
+        System.out.println("Release Year: " + film.getReleaseYear());
+        System.out.println("Language: " + film.getLanguage());
+        System.out.println("Rental Duration In Days: " + film.getRentalDurationInDays());
+        System.out.println("Rental Rate: $" + film.getRentalRate());
+        System.out.println("Film Length In Minutes: " + film.getFilmLengthInMinutes());
+        System.out.println("Replacement Cost: $" + film.getReplacementCost());
+        System.out.println("Rating: " + film.getRating());
+        System.out.println("Special Features: " + film.getSpecialFeatures());
 
-	}
-
+        List<Actor> actors = film.getFilmCast();
+        if (actors != null && !actors.isEmpty()) {
+            System.out.println("Film Cast:");
+            for (Actor actor : actors) {
+                System.out.println("  " + actor);
+            }
+        }
+    }
 }

@@ -1,17 +1,18 @@
 package com.skilldistillery.filmquery.entities;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class Film {
 	private int id;
 	private String title;
 	private String description;
 	private int releaseYear;
-	private int languageId;
+	private String languageId;
+	private String language;
 	private int rentalDurationInDays;
 	private double rentalRate;
-	private int rentalLengthInMinutes;
+	private int filmLengthInMinutes;
 	private double replacementCost;
 	private String rating;
 	private String specialFeatures;
@@ -21,7 +22,7 @@ public class Film {
 
 	}
 
-	public Film(int id, String title, String description, int releaseYear, int languageId, int rentalDurationInDays,
+	public Film(int id, String title, String description, int releaseYear, String language, int rentalDurationInDays,
 			double rentalRate, int rentalLengthInMinutes, double replacementCost, String rating,
 			String specialFeatures) {
 		super();
@@ -29,10 +30,10 @@ public class Film {
 		this.title = title;
 		this.description = description;
 		this.releaseYear = releaseYear;
-		this.languageId = languageId;
+		this.language = language;
 		this.rentalDurationInDays = rentalDurationInDays;
 		this.rentalRate = rentalRate;
-		this.rentalLengthInMinutes = rentalLengthInMinutes;
+		this.filmLengthInMinutes = rentalLengthInMinutes;
 		this.replacementCost = replacementCost;
 		this.rating = rating;
 		this.specialFeatures = specialFeatures;
@@ -70,12 +71,29 @@ public class Film {
 		this.releaseYear = releaseYear;
 	}
 
-	public int getLanguageId() {
+	public String getLanguageId() {
 		return languageId;
 	}
 
-	public void setLanguageId(int languageId) {
+	public void setLanguageId(String languageId) {
 		this.languageId = languageId;
+	}
+
+	public void setLanguage(String language) {
+		if (isValidLanguage(language)) {
+			this.language = language;
+		} else {
+			throw new IllegalArgumentException("Invalid language: " + language);
+		}
+	}
+
+	private boolean isValidLanguage(String language) {
+		String[] validLanguages = { "English", "Italian", "Japanese", "Mandarin", "French", "German" };
+		return Arrays.asList(validLanguages).contains(language);
+	}
+	
+	public String getLanguage() {
+		return language;
 	}
 
 	public int getRentalDurationInDays() {
@@ -94,12 +112,12 @@ public class Film {
 		this.rentalRate = rentalRate;
 	}
 
-	public int getRentalLengthInMinutes() {
-		return rentalLengthInMinutes;
+	public int getFilmLengthInMinutes() {
+		return filmLengthInMinutes;
 	}
 
-	public void setRentalLengthInMinutes(int rentalLengthInMinutes) {
-		this.rentalLengthInMinutes = rentalLengthInMinutes;
+	public void setFilmLengthInMinutes(int filmLengthInMinutes) {
+		this.filmLengthInMinutes = filmLengthInMinutes;
 	}
 
 	public double getReplacementCost() {
@@ -135,36 +153,12 @@ public class Film {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(description, filmCast, id, languageId, rating, releaseYear, rentalDurationInDays,
-				rentalLengthInMinutes, rentalRate, replacementCost, specialFeatures, title);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Film other = (Film) obj;
-		return Objects.equals(description, other.description) && Objects.equals(filmCast, other.filmCast)
-				&& id == other.id && languageId == other.languageId && Objects.equals(rating, other.rating)
-				&& releaseYear == other.releaseYear && rentalDurationInDays == other.rentalDurationInDays
-				&& rentalLengthInMinutes == other.rentalLengthInMinutes
-				&& Double.doubleToLongBits(rentalRate) == Double.doubleToLongBits(other.rentalRate)
-				&& Double.doubleToLongBits(replacementCost) == Double.doubleToLongBits(other.replacementCost)
-				&& Objects.equals(specialFeatures, other.specialFeatures) && Objects.equals(title, other.title);
-	}
-
-	@Override
 	public String toString() {
-		return "Film [id=" + id + ", title=" + title + ", description=" + description + ", releaseYear=" + releaseYear
-				+ ", languageId=" + languageId + ", rentalDurationInDays=" + rentalDurationInDays + ", rentalRate="
-				+ rentalRate + ", rentalLengthInMinutes=" + rentalLengthInMinutes + ", replacementCost="
-				+ replacementCost + ", rating=" + rating + ", specialFeatures=" + specialFeatures + ", filmCast="
-				+ filmCast + "]";
+		return "Film ID: " + id + "|| Title: " + title + ", Description: " + description + ", Release Year: "
+				+ releaseYear + ", Language: " + language + ", Rental Duration In Days: " + rentalDurationInDays
+				+ ", Rental Rate: $" + rentalRate + ", Film Length In Minutes: " + filmLengthInMinutes
+				+ ", Replacement Cost: $" + replacementCost + ", Rating: " + rating + ", Special Features: "
+				+ specialFeatures;
 	}
 
 }

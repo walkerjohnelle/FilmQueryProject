@@ -1,3 +1,4 @@
+// DatabaseAccessorObject.java
 package com.skilldistillery.filmquery.database;
 
 import java.sql.Connection;
@@ -25,34 +26,18 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
     }
 
     @Override
-    public Film findFilmById(int filmId) throws SQLException {
+    public Film findFilmById(int filmId) {
         Film film = null;
-        try {
-            Connection conn = DriverManager.getConnection(URL, USER, PWD);
+        try (Connection conn = DriverManager.getConnection(URL, USER, PWD);
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM film WHERE id = ?")) {
 
-            String sql = "SELECT * FROM film WHERE id = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, filmId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                String title = rs.getString("title");
-                String description = rs.getString("description");
-                short releaseYear = rs.getShort("release_year");
-                int languageId = rs.getInt("language_id");
-                int rentalDurationInDays = rs.getInt("rental_duration");
-                double rentalRate = rs.getDouble("rental_rate");
-                int rentalLengthInMinutes = rs.getInt("length");
-                double replacementCost = rs.getDouble("replacement_cost");
-                String rating = rs.getString("rating");
-                String specialFeatures = rs.getString("special_features");
-
-                film = new Film(filmId, title, description, releaseYear, languageId, rentalDurationInDays,
-                        rentalRate, rentalLengthInMinutes, replacementCost, rating, specialFeatures);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    film = createFilmFromResultSet(rs);
+                }
             }
-            rs.close();
-            ps.close();
-            conn.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -60,28 +45,23 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
     }
 
     @Override
-    public Actor findActorById(int actorId) throws SQLException {
+    public Actor findActorById(int actorId) {
         Actor actor = null;
-        Connection conn = DriverManager.getConnection(URL, USER, PWD);
+        try (Connection conn = DriverManager.getConnection(URL, USER, PWD);
+             PreparedStatement ps = conn.prepareStatement("SELECT id, first_name, last_name FROM actor WHERE id = ?")) {
 
-        String sql = "SELECT id, first_name, last_name FROM actor WHERE id = ?";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setInt(1, actorId);
-        ResultSet actorResult = ps.executeQuery();
+            ps.setInt(1, actorId);
+            try (ResultSet actorResult = ps.executeQuery()) {
+                if (actorResult.next()) {
+                    actor = createActorFromResultSet(actorResult);
+                    actor.setFilm(findFilmsByActorId(actorId));
+                } else {
+                    System.out.println("Actor ID does not exist. Please enter a valid ID.");
+                }
+            }
 
-        if (actorResult.next()) {
-            actor = new Actor();
-            actor.setId(actorResult.getInt("id"));
-            actor.setFirstName(actorResult.getString("first_name"));
-            actor.setLastName(actorResult.getString("last_name"));
-            actor.setFilm(findFilmsByActorId(actorId));
-
-            actorResult.close();
-            ps.close();
-            conn.close();
-
-        } else {
-            System.out.println("Actor ID does not exist. Please enter a valid ID.");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return actor;
     }
@@ -89,35 +69,20 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
     @Override
     public List<Film> findFilmsByActorId(int actorId) {
         List<Film> films = new ArrayList<>();
-        try {
-            Connection conn = DriverManager.getConnection(URL, USER, PWD);
-            String sql = "SELECT id, title, description, release_year, language_id, rental_duration, ";
-            sql += " rental_rate, length, replacement_cost, rating, special_features "
-                    + " FROM film JOIN film_actor ON film.id = film_actor.film_id " + " WHERE actor_id = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(URL, USER, PWD);
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT id, title, description, release_year, language_id, rental_duration, "
+                             + "rental_rate, length, replacement_cost, rating, special_features "
+                             + "FROM film JOIN film_actor ON film.id = film_actor.film_id WHERE actor_id = ?")) {
+
             ps.setInt(1, actorId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                int filmId = rs.getInt("id");
-                String title = rs.getString("title");
-                String description = rs.getString("description");
-                short releaseYear = rs.getShort("release_year");
-                int languageId = rs.getInt("language_id");
-                int rentalDurationInDays = rs.getInt("rental_duration");
-                double rentalRate = rs.getDouble("rental_rate");
-                int rentalLengthInMinutes = rs.getInt("length");
-                double replacementCost = rs.getDouble("replacement_cost");
-                String rating = rs.getString("rating");
-                String specialFeatures = rs.getString("special_features");
-
-                Film film = new Film(filmId, title, description, releaseYear, languageId, rentalDurationInDays,
-                        rentalRate, rentalLengthInMinutes, replacementCost, rating, specialFeatures);
-
-                films.add(film);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Film film = createFilmFromResultSet(rs);
+                    films.add(film);
+                }
             }
-            rs.close();
-            ps.close();
-            conn.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -125,30 +90,79 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
     }
 
     @Override
-    public List<Actor> findActorsByFilmId(int filmId) throws SQLException {
+    public List<Actor> findActorsByFilmId(int filmId) {
         List<Actor> actors = new ArrayList<>();
-        Connection conn = DriverManager.getConnection(URL, USER, PWD);
-        String sql = "SELECT film.title, actor.first_name, actor.last_name\n" + "FROM actor\n"
-                + "JOIN film_actor ON actor.id = film_actor.actor_id\n" + "JOIN film ON film.id = film_actor.film_id\n"
-                + "WHERE film.id = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PWD);
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT actor.id, actor.first_name, actor.last_name FROM actor "
+                             + "JOIN film_actor ON actor.id = film_actor.actor_id "
+                             + "JOIN film ON film.id = film_actor.film_id WHERE film.id = ?")) {
 
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setInt(1, filmId);
-        ResultSet rs = ps.executeQuery();
+            ps.setInt(1, filmId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Actor actor = createActorFromResultSet(rs);
+                    actors.add(actor);
+                }
+            }
 
-        while (rs.next()) {
-            Actor actor = new Actor();
-            String title = rs.getString("title");
-            actor.setFirstName(rs.getString("first_name"));
-            actor.setLastName(rs.getString("last_name"));
-
-            actors.add(actor);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        rs.close();
-        ps.close();
-        conn.close();
-
         return actors;
+    }
+
+    @Override
+    public Film findFilmByKeyword(String keyword) {
+        // TODO: Implement this method
+        return null;
+    }
+
+    private Film createFilmFromResultSet(ResultSet rs) throws SQLException {
+        int filmId = rs.getInt("id");
+        String title = rs.getString("title");
+        String description = rs.getString("description");
+        short releaseYear = rs.getShort("release_year");
+        String languageId = rs.getString("language_id");
+        int rentalDurationInDays = rs.getInt("rental_duration");
+        double rentalRate = rs.getDouble("rental_rate");
+        int rentalLengthInMinutes = rs.getInt("length");
+        double replacementCost = rs.getDouble("replacement_cost");
+        String rating = rs.getString("rating");
+        String specialFeatures = rs.getString("special_features");
+
+        Film film = new Film(filmId, title, description, releaseYear, languageId, rentalDurationInDays,
+                rentalRate, rentalLengthInMinutes, replacementCost, rating, specialFeatures);
+        
+        String language = getLanguageNameFromDatabase(languageId);
+        film.setLanguage(language);
+
+        return film;
+    }
+
+    private Actor createActorFromResultSet(ResultSet rs) throws SQLException {
+        int actorId = rs.getInt("id");
+        String firstName = rs.getString("first_name");
+        String lastName = rs.getString("last_name");
+
+        return new Actor(actorId, firstName, lastName);
+    }
+
+    private String getLanguageNameFromDatabase(String languageId) {
+        String language = null;
+        try (Connection conn = DriverManager.getConnection(URL, USER, PWD);
+             PreparedStatement ps = conn.prepareStatement("SELECT name FROM language WHERE id = ?")) {
+
+            ps.setString(1, languageId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    language = rs.getString("name");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return language;
     }
 }
