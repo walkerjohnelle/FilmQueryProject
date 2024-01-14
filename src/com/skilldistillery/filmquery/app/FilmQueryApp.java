@@ -30,11 +30,11 @@ public class FilmQueryApp {
         boolean validEntry = true;
 
         while (validEntry) {
-            System.out.println("***********Menu Options:***********");
-            System.out.println("1. Look Up Film By ID:            |");
-            System.out.println("2. Look Up Film By Search Keyword:|");
-            System.out.println("3. Exit Application               |");
-            System.out.println("***********Menu Options:***********");
+            System.out.println("*********** Menu Options ************");
+            System.out.println("1. Look Up Film By ID:              |");
+            System.out.println("2. Look Up Film By Search Keyword:  |");
+            System.out.println("3. Exit Application                 |");
+            System.out.println("*************************************");
 
             int menuSelection = input.nextInt();
             input.nextLine(); 
@@ -51,8 +51,10 @@ public class FilmQueryApp {
                     }
                     break;
                 case 2:
-                    // TODO: Implement searching by keyword
-                    break;
+                	System.out.print("Enter Keyword From Film Title / Description: ");
+                    String keyword = input.nextLine();
+                    Film film2 = db.findFilmByKeyword(keyword);
+                	break;
                 case 3:
                     validEntry = false;
                     System.out.println("Exiting Application.");
@@ -69,12 +71,9 @@ public class FilmQueryApp {
         System.out.println("Description: " + film.getDescription());
         System.out.println("Release Year: " + film.getReleaseYear());
         System.out.println("Language: " + film.getLanguage());
-        System.out.println("Rental Duration In Days: " + film.getRentalDurationInDays());
         System.out.println("Rental Rate: $" + film.getRentalRate());
         System.out.println("Film Length In Minutes: " + film.getFilmLengthInMinutes());
-        System.out.println("Replacement Cost: $" + film.getReplacementCost());
         System.out.println("Rating: " + film.getRating());
-        System.out.println("Special Features: " + film.getSpecialFeatures());
 
         List<Actor> actors = film.getFilmCast();
         if (actors != null && !actors.isEmpty()) {

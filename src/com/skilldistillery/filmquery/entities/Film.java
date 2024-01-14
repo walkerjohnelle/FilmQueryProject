@@ -23,8 +23,8 @@ public class Film {
 	}
 
 	public Film(int id, String title, String description, int releaseYear, String language, int rentalDurationInDays,
-			double rentalRate, int rentalLengthInMinutes, double replacementCost, String rating,
-			String specialFeatures) {
+			double rentalRate, int rentalLengthInMinutes, double replacementCost, String rating, String specialFeatures,
+			List<Actor> filmCast) {
 		super();
 		this.id = id;
 		this.title = title;
@@ -37,6 +37,7 @@ public class Film {
 		this.replacementCost = replacementCost;
 		this.rating = rating;
 		this.specialFeatures = specialFeatures;
+		this.filmCast = filmCast;
 	}
 
 	public int getId() {
@@ -91,7 +92,7 @@ public class Film {
 		String[] validLanguages = { "English", "Italian", "Japanese", "Mandarin", "French", "German" };
 		return Arrays.asList(validLanguages).contains(language);
 	}
-	
+
 	public String getLanguage() {
 		return language;
 	}
@@ -158,7 +159,7 @@ public class Film {
 				+ releaseYear + ", Language: " + language + ", Rental Duration In Days: " + rentalDurationInDays
 				+ ", Rental Rate: $" + rentalRate + ", Film Length In Minutes: " + filmLengthInMinutes
 				+ ", Replacement Cost: $" + replacementCost + ", Rating: " + rating + ", Special Features: "
-				+ specialFeatures;
+				+ specialFeatures + ", Film's Cast: " + filmCast;
 	}
 
 }
