@@ -114,37 +114,35 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 	}
 
 	@Override
-	public Film findFilmByKeyword(String keyword) {
-		List<Film> keywordSearchResult = new ArrayList<>();
-		try (Connection conn = DriverManager.getConnection(URL, USER, PWD);
-				PreparedStatement ps = conn
-						.prepareStatement("SELECT * FROM film WHERE title LIKE ? OR description LIKE ?")) {
+	public List<Film> findFilmByKeyword(String keyword) {
+	    List<Film> keywordSearchResult = new ArrayList<>();
+	    try (Connection conn = DriverManager.getConnection(URL, USER, PWD);
+	            PreparedStatement ps = conn
+	                    .prepareStatement("SELECT * FROM film WHERE title LIKE ? OR description LIKE ?")) {
 
-			ps.setString(1, "%" + keyword + "%");
-			ps.setString(2, "%" + keyword + "%");
+	        ps.setString(1, "%" + keyword + "%");
+	        ps.setString(2, "%" + keyword + "%");
 
-			try (ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
-					Film film = createFilmFromResultSet(rs);
-					keywordSearchResult.add(film);
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	        try (ResultSet rs = ps.executeQuery()) {
+	            while (rs.next()) {
+	                Film film = createFilmFromResultSet(rs);
+	                keywordSearchResult.add(film);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
 
-		System.out.println("Keyword: " + keyword);
-		System.out.println("Search Result Size: " + keywordSearchResult.size());
+	    System.out.println("Keyword: " + keyword);
+	    System.out.println("Search Result Size: " + keywordSearchResult.size());
 
-		for (Film film : keywordSearchResult) {
-			System.out.println(film);
-		}
+	    for (Film film : keywordSearchResult) {
+	        System.out.println(film);
+	    }
 
-		if (!keywordSearchResult.isEmpty()) {
-			return keywordSearchResult.get(0);
-		}
-		return null;
+	    return keywordSearchResult; 
 	}
+
 
 	private Film createFilmFromResultSet(ResultSet rs) throws SQLException {
 		int filmId = rs.getInt("id");
