@@ -1,5 +1,5 @@
 # FilmQueryProject
-![Project Logo](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwVNrGOh46abKpMWfU-KYDjRRDDujQ-KNOhg&usqp=CAU)
+![Project Logo](https://s3.amazonaws.com/nightjarprod/content/uploads/sites/249/2022/09/13235630/VidiotsVideoStoreRenderingZJ-e1668482351696.jpeg)
 
 # Description
 The FilmQueryProject is a command-line application that allows users to retrieve and display film data. It provides a menu-based interface where users can choose to look up films by ID, search keywords, or exit the application. The project encapsulates JDBC code within the com.skilldistillery.filmquery.database.DatabaseAccessorObject class, and user input and display output are handled in methods of the com.skilldistillery.filmquery.app.FilmQueryApp class.
